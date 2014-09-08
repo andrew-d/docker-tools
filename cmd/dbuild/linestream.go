@@ -6,15 +6,15 @@ import (
 )
 
 type LineStreamer struct {
-	out io.Writer
-	prefix string
+	out     io.Writer
+	prefix  string
 	postfix string
 }
 
 func NewLineStreamer(out io.Writer, prefix, postfix string) *LineStreamer {
 	ret := &LineStreamer{
-		out: out,
-		prefix: prefix,
+		out:     out,
+		prefix:  prefix,
 		postfix: postfix,
 	}
 	return ret

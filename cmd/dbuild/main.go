@@ -16,11 +16,11 @@ import (
 )
 
 var (
-	flagNoCache  bool
-	flagRm       bool
-	flagForceRm  bool
-	flagRmAfter bool
-	flagEndpoint string
+	flagNoCache   bool
+	flagRm        bool
+	flagForceRm   bool
+	flagRmAfter   bool
+	flagEndpoint  string
 	flagImageName string
 )
 
