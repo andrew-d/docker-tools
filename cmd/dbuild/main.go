@@ -122,10 +122,12 @@ func main() {
 		return
 	}
 
+	imageName := "FIXME"
+
 	// Set up build options.
 	output := NewLineStreamer(os.Stdout, "   [build] ", "")
 	opts := docker.BuildImageOptions{
-		Name:         "FIXME",
+		Name:         imageName,
 		InputStream:  buildctx,
 		OutputStream: output,
 
@@ -143,6 +145,31 @@ func main() {
 		return
 	}
 	log.Println("Finished building image")
+
+	// Inspect the image to get information.
+	img, err := client.InspectImage(imageName)
+	if err != nil {
+		log.Printf("Error inspecting image: %s", err)
+		return
+	}
+
+	log.Printf("Image built (size = %d)", img.Size)
+
+	// Export the image to our output file.
+	exportOpts := docker.ExportImageOptions{
+		Name:         imageName,
+		OutputStream: outf,
+	}
+
+	log.Println("Exporting built image, please wait...")
+	err = client.ExportImage(exportOpts)
+	if err != nil {
+		log.Printf("Error exporting image: %s", err)
+		return
+	}
+	log.Println("Finished exporting")
+
+	log.Println("All done!")
 }
 
 // Write the contents of a file to a TAR file.
