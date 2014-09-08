@@ -19,6 +19,7 @@ var (
 	flagNoCache  bool
 	flagRm       bool
 	flagForceRm  bool
+	flagRmAfter bool
 	flagEndpoint string
 	flagImageName string
 )
@@ -30,6 +31,8 @@ func init() {
 		"Remove intermediate containers after a successful build")
 	flag.BoolVar(&flagForceRm, "force-rm", false,
 		"Always remove intermediate containers, even after unsuccessful builds")
+	flag.BoolVar(&flagRmAfter, "rm-after", false,
+		"Remove the image from Docker after it's built and exported")
 	flag.StringVarP(&flagEndpoint, "endpoint", "e", "unix:///var/run/docker.sock",
 		"How to connect to the Docker service")
 	flag.StringVarP(&flagImageName, "name", "n", "",
@@ -237,7 +240,16 @@ func main() {
 	}
 	log.Println("Finished exporting")
 
-	log.Println("All done!")
+	// Optionally remove the image.
+	if flagRmAfter {
+		err = client.RemoveImage(flagImageName)
+		if err != nil {
+			log.Printf("Error removing image: %s", err)
+			return
+		}
+	}
+
+	log.Println("Completed successfully")
 }
 
 // Write the contents of a file to a TAR file.
