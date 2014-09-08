@@ -1,0 +1,18 @@
+{
+	"ImportPath": "github.com/andrew-d/docker-tools",
+	"GoVersion": "go1.3.1",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/fsouza/go-dockerclient",
+			"Comment": "0.2.1-242-g4c095e6",
+			"Rev": "4c095e69b1fb9fb1ca44035a7cdb7c40fe3d3b5a"
+		},
+		{
+			"ImportPath": "github.com/ogier/pflag",
+			"Rev": "e4f7d00f344b0954fa3791a8527d10ba7334eceb"
+		}
+	]
+}
