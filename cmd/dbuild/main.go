@@ -56,8 +56,18 @@ func main() {
 		usage()
 	}
 
-	dockerfilePath := flag.Arg(0)
-	rootPath := flag.Arg(1)
+	dockerfilePath, err := filepath.Abs(flag.Arg(0))
+	if err != nil {
+		log.Printf("Error finding absolute path (1): %s", err)
+		return
+	}
+
+	rootPath, err := filepath.Abs(flag.Arg(1))
+	if err != nil {
+		log.Printf("Error finding absolute path (2): %s", err)
+		return
+	}
+
 	outputPath := flag.Arg(2)
 
 	log.Println("Started")
@@ -95,7 +105,7 @@ func main() {
 		return
 	}
 
-	err = writeFileTo(tr, dockerfile)
+	err = writeFileTo(tr, dockerfile, "Dockerfile")
 	if err != nil {
 		log.Printf("Error writing Dockerfile to build context: %s", err)
 		return
@@ -104,21 +114,62 @@ func main() {
 	// Recursively search the root for other files and add those.
 	log.Println("Adding files to build context...")
 
+	rootDockerfilePath := filepath.Join(rootPath, "Dockerfile")
 	err = filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
 		// If there's an error, we just return it and abort the walk.
 		if err != nil {
 			return err
 		}
 
-		// TODO: add this file to the tar file
-		// TODO: ensure that the file we're adding isn't our Dockerfile (don't want
-		//		 to add it twice)
+		// Ignore paths that start with '.'
+		if len(path) > 0 && path[0] == '.' {
+			if info.IsDir() {
+				return filepath.SkipDir
+			} else {
+				return nil
+			}
+		}
+
+		// Just descend into directories.
+		if info.IsDir() {
+			return nil
+		}
+
+		// We skip this file if the path is the same as our Dockerfile, and if
+		// it's in the root directory.  This is to avoid having two Dockerfiles
+		// in the root.
+		if path == rootDockerfilePath {
+			return nil
+		}
+
+		// Find the path relative to the root.
+		rel, err := filepath.Rel(rootPath, path)
+		if err != nil {
+			return err
+		}
+
+		// Open the file.
+		f, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		// This is the VT100 escape sequence for "clear line".
+		fmt.Printf("\r\033[2KAdding file: %s", rel)
+
+		// Add this file to the TAR file.
+		err = writeFileTo(tr, f, rel)
+
+		// TODO: ensure that the file we're adding isn't our Dockerfile?
 
 		// log.Println(path)
 
-		return nil
+		return err
 	})
 
+	// Clear line
+	fmt.Printf("\r\033[2K")
 	log.Println("Finished adding build context")
 
 	err = tr.Close()
@@ -190,7 +241,7 @@ func main() {
 }
 
 // Write the contents of a file to a TAR file.
-func writeFileTo(tarfile *tar.Writer, f *os.File) error {
+func writeFileTo(tarfile *tar.Writer, f *os.File, name string) error {
 	info, err := f.Stat()
 	if err != nil {
 		return err
@@ -200,6 +251,8 @@ func writeFileTo(tarfile *tar.Writer, f *os.File) error {
 	if err != nil {
 		return err
 	}
+
+	header.Name = name
 
 	err = tarfile.WriteHeader(header)
 	if err != nil {
