@@ -36,7 +36,7 @@ func init() {
 	flag.StringVarP(&flagEndpoint, "endpoint", "e", "unix:///var/run/docker.sock",
 		"How to connect to the Docker service")
 	flag.StringVarP(&flagImageName, "name", "n", "",
-		"The name to give the built image")
+		"The name to give the built image (default: randomly generated)")
 }
 
 func usage() {
