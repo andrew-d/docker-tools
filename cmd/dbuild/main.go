@@ -248,11 +248,13 @@ func main() {
 
 	// Optionally remove the image.
 	if flagRmAfter {
+		log.Println("Removing image...")
 		err = client.RemoveImage(flagImageName)
 		if err != nil {
 			log.Printf("Error removing image: %s", err)
 			return
 		}
+		log.Println("Image removed")
 	}
 
 	log.Println("Completed successfully")
