@@ -32,7 +32,14 @@ func init() {
 }
 
 func usage() {
-	fmt.Println("Usage: dbuild [options] <Dockerfile> <root path> <output file>")
+	fmt.Println(
+`Usage: dbuild [options] <Dockerfile> <root path> <output file>
+
+Builds a Docker image from the given Dockerfile, with the root of the build
+context at the given root path.  The built image is then exported into the
+given output file.
+
+Options:`)
 	flag.PrintDefaults()
 	os.Exit(1)
 }
