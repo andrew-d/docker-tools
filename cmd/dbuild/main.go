@@ -2,6 +2,7 @@ package main
 
 import (
 	"archive/tar"
+	"crypto/rand"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -19,6 +20,7 @@ var (
 	flagRm       bool
 	flagForceRm  bool
 	flagEndpoint string
+	flagImageName string
 )
 
 func init() {
@@ -30,6 +32,8 @@ func init() {
 		"Always remove intermediate containers, even after unsuccessful builds")
 	flag.StringVarP(&flagEndpoint, "endpoint", "e", "unix:///var/run/docker.sock",
 		"How to connect to the Docker service")
+	flag.StringVarP(&flagImageName, "name", "n", "",
+		"The name to give the built image")
 }
 
 func usage() {
@@ -130,12 +134,17 @@ func main() {
 		return
 	}
 
-	imageName := "FIXME"
+	// Get the image name.
+	if len(flagImageName) == 0 {
+		flagImageName = randString(20)
+	}
+	log.Printf("Using image name: %s", flagImageName)
 
-	// Set up build options.
-	output := NewLineStreamer(os.Stdout, "   [build] ", "")
+	// Set up build options.  Note that the escape at the end resets the
+	// terminal color.
+	output := NewLineStreamer(os.Stdout, "   [build] ", "\x1b[0m")
 	opts := docker.BuildImageOptions{
-		Name:         imageName,
+		Name:         flagImageName,
 		InputStream:  buildctx,
 		OutputStream: output,
 
@@ -155,7 +164,7 @@ func main() {
 	log.Println("Finished building image")
 
 	// Inspect the image to get information.
-	img, err := client.InspectImage(imageName)
+	img, err := client.InspectImage(flagImageName)
 	if err != nil {
 		log.Printf("Error inspecting image: %s", err)
 		return
@@ -165,7 +174,7 @@ func main() {
 
 	// Export the image to our output file.
 	exportOpts := docker.ExportImageOptions{
-		Name:         imageName,
+		Name:         flagImageName,
 		OutputStream: outf,
 	}
 
@@ -199,4 +208,15 @@ func writeFileTo(tarfile *tar.Writer, f *os.File) error {
 
 	_, err = io.Copy(tarfile, f)
 	return err
+}
+
+func randString(n int) string {
+	const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+
+	var bytes = make([]byte, n)
+	rand.Read(bytes)
+	for i, b := range bytes {
+		bytes[i] = alphanum[b%byte(len(alphanum))]
+	}
+	return string(bytes)
 }
