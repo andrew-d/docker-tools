@@ -81,6 +81,12 @@ func main() {
 		return
 	}
 
+	err = client.Ping()
+	if err != nil {
+		log.Printf("Error pinging Docker client: %s", err)
+		return
+	}
+
 	log.Println("Connected to Docker client")
 
 	// Create the output buffer.
