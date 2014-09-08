@@ -10,6 +10,18 @@ output file, it will copy the Dockerfile to the root directory, run the build, a
 final container to a tar file (optionally compressed).  The Dockerfile is removed from the root
 after building (unless it's already located there).
 
+Example:
+
+```
+$ dbuild --name myapp build/subdir/Dockerfile build/ myapp.image
+2014/01/01 13:14:15 Started
+[...]
+2014/01/01 13:14:43 Completed successfully
+
+# Copy the image to the Docker host, and then...
+$ docker load < myapp.image
+```
+
 
 ## dcontrol
 
