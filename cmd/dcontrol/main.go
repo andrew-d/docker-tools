@@ -91,9 +91,14 @@ func main() {
 		containers = append(containers, c)
 	}
 
-	for i, c := range containers {
-		log.Printf("%d: %#v", i, c)
+	// Find the topological sorting of our containers.
+	toposort, err := TopoSortContainers(containers)
+	if err != nil {
+		// TODO: good message?
+		log.Println(err)
+		return
 	}
+	_ = toposort
 
 	// Figure out what we're doing with our config.
 	cmd := strings.ToLower(flag.Arg(0))
