@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	flag "github.com/ogier/pflag"
 	"gopkg.in/yaml.v1"
@@ -18,8 +20,30 @@ func init() {
 		"The config file to use")
 }
 
+func usage() {
+	fmt.Println(strings.TrimSpace(`
+Usage: dcontrol <command> [options]
+
+Commands:
+    create <cluster>        Builds containers for a given cluster.
+    start <cluster>         Start all containers in a given cluster.
+    stop <cluster>          Stop all containers in a given cluster.
+    restart <cluster>       Restart all containers in a given cluster.
+    status <cluster>        Show the status of all the containers in a given
+                            cluster.
+
+Options:
+`))
+	flag.PrintDefaults()
+	os.Exit(1)
+}
+
 func main() {
 	flag.Parse()
+
+	if flag.NArg() < 2 {
+		usage()
+	}
 
 	log.Println("Started")
 
@@ -69,6 +93,17 @@ func main() {
 
 	for i, c := range containers {
 		log.Printf("%d: %#v", i, c)
+	}
+
+	// Figure out what we're doing with our config.
+	cmd := strings.ToLower(flag.Arg(0))
+	switch cmd {
+	case "create":
+		CmdCreate()
+
+	default:
+		log.Printf("Unknown command: %s", cmd)
+		return
 	}
 
 	log.Println("Completed successfully")
