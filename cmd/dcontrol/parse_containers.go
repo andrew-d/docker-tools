@@ -93,13 +93,27 @@ func parseContainerMapDependencies(ret *Container, val interface{}) error {
 		return fmt.Errorf("Unknown value type: %T", val)
 	}
 
-	ret.Dependencies = []string{}
-	for _, d := range deps {
+	ret.Dependencies = []DepConfig{}
+	for i, d := range deps {
 		if dep, ok = d.(string); !ok {
 			return fmt.Errorf("Unknown value type in array: %T", d)
 		}
 
-		ret.Dependencies = append(ret.Dependencies, dep)
+		dconf := DepConfig{}
+
+		parts := strings.Split(dep, ":")
+		switch len(parts) {
+		case 1:
+			dconf.Name = parts[0]
+			dconf.Alias = parts[0]
+		case 2:
+			dconf.Name = parts[0]
+			dconf.Alias = parts[1]
+		default:
+			return fmt.Errorf("Unknown format for dependency entry %d", i)
+		}
+
+		ret.Dependencies = append(ret.Dependencies, dconf)
 	}
 
 	return nil

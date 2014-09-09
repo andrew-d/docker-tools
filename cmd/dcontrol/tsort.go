@@ -33,17 +33,17 @@ func TopoSortContainers(containers []*Container) ([]int, error) {
 
 	for ci, c := range containers {
 		for _, dep := range c.Dependencies {
-			if dep == c.Name {
+			if dep.Name == c.Name {
 				return nil, fmt.Errorf("Container '%s' depends on itself", dep)
 			}
 
 			// Ensure the dependency exists.
-			if _, ok := indexes[dep]; !ok {
+			if _, ok := indexes[dep.Name]; !ok {
 				return nil, fmt.Errorf("Dependency '%s' for container '%s' does not exist",
 					dep, c.Name)
 			}
 
-			edges[indexes[dep]] = append(edges[indexes[dep]], ci)
+			edges[indexes[dep.Name]] = append(edges[indexes[dep.Name]], ci)
 			degree[ci]++
 		}
 	}

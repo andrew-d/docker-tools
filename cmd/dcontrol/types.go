@@ -2,7 +2,7 @@ package main
 
 type Config struct {
 	// Parsed containers and topological sort.
-	Containers []*Container
+	Containers    []*Container
 	ContainerSort []int
 }
 
@@ -11,11 +11,16 @@ type Container struct {
 	Image      string
 	Privileged bool
 
-	Dependencies []string
+	Dependencies []DepConfig
 	Env          []EnvConfig
 	Ports        []PortConfig
 	Mount        []MountConfig
 	MountFrom    []string
+}
+
+type DepConfig struct {
+	Name  string
+	Alias string
 }
 
 type PortConfig struct {
