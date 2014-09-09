@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const TEST_ITERATIONS = 10000
+const TestIterations = 10000
 
 func TestRandomGraphs(t *testing.T) {
 	// Get a random seed.
@@ -18,7 +18,7 @@ func TestRandomGraphs(t *testing.T) {
 	source := rand.NewSource(seed)
 	rng := rand.New(source)
 
-	for cnt := 0; cnt < TEST_ITERATIONS; cnt++ {
+	for cnt := 0; cnt < TestIterations; cnt++ {
 		numNodes := rng.Intn(100-10) + 10
 		addedDeps := 0
 		containers := make([]*Container, numNodes)
@@ -32,10 +32,10 @@ func TestRandomGraphs(t *testing.T) {
 				Dependencies: []string{},
 			}
 
-			num_deps := rng.Intn(10)
-			seenDeps := make(map[int]struct{}, num_deps)
+			numDeps := rng.Intn(10)
+			seenDeps := make(map[int]struct{}, numDeps)
 
-			for j := 0; j < num_deps; j++ {
+			for j := 0; j < numDeps; j++ {
 				// Select a random number in the range (i, numNodes]
 				depNum := rng.Intn(numNodes-i) + i
 

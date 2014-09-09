@@ -7,7 +7,11 @@ import (
 
 var _ = log.Println
 
-// Kahn algorithm for topological sorting (adapted from Wikipedia and RosettaCode)
+// TopoSortContainers uses the Kahn algorithm for topological sorting (adapted
+// from Wikipedia and RosettaCode)
+// See:
+//		http://rosettacode.org/wiki/Topological_sort#Go
+//		https://en.wikipedia.org/wiki/Topological_sorting
 func TopoSortContainers(containers []*Container) ([]int, error) {
 	// Convert names to indexes.
 	indexes := make(map[string]int, len(containers))
@@ -39,14 +43,14 @@ func TopoSortContainers(containers []*Container) ([]int, error) {
 			}
 
 			edges[indexes[dep]] = append(edges[indexes[dep]], ci)
-			degree[ci] += 1
+			degree[ci]++
 		}
 	}
 
 	// Find a list of "start nodes" that have no incoming edges - i.e. they
 	// have no dependencies.
 	S := []int{}
-	for i, _ := range containers {
+	for i := range containers {
 		if degree[i] == 0 {
 			S = append(S, i)
 		}

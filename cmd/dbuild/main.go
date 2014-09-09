@@ -134,9 +134,8 @@ func main() {
 		if len(path) > 0 && path[0] == '.' {
 			if info.IsDir() {
 				return filepath.SkipDir
-			} else {
-				return nil
 			}
+			return nil
 		}
 
 		// Just descend into directories.
