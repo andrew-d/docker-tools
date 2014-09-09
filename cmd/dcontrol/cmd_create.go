@@ -55,7 +55,7 @@ func cmdCreate(config *Config) {
 		}
 		for i, mfrom := range container.MountFrom {
 			if i > 0 {
-				log.Warnf(`Currently only support one 'volumes-from'.  The last entry will be used.`)
+				log.Warnf("Currently only support one 'volumes-from'.  The last entry will be used.")
 			}
 			opts.Config.VolumesFrom = mfrom
 		}
@@ -66,5 +66,8 @@ func cmdCreate(config *Config) {
 			log.Errorf("Error creating container %s: %s", container.Name, err)
 			return
 		}
+		log.Infof("Created container: %s", container.Name)
 	}
+
+	log.Infof("Finished creating containers")
 }
