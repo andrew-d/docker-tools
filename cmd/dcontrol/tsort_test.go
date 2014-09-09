@@ -11,6 +11,10 @@ import (
 const TestIterations = 10000
 
 func TestRandomGraphs(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping random testing in short mode")
+	}
+
 	// Get a random seed.
 	seed := rand.Int63()
 	fmt.Printf("Seed = %d\n", seed)
