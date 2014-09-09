@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 
+	"github.com/andrew-d/docker-tools/log"
 	flag "github.com/ogier/pflag"
 	"gopkg.in/yaml.v1"
 )
@@ -45,71 +45,73 @@ func main() {
 		usage()
 	}
 
-	log.Println("Started")
+	log.Infof("Started")
 
 	f, err := os.Open(flagConfig)
 	if err != nil {
-		log.Printf("Error opening config file: %s", err)
+		log.Errorf("Error opening config file: %s", err)
 		return
 	}
 	defer f.Close()
 
 	data, err := ioutil.ReadAll(f)
 	if err != nil {
-		log.Printf("Error reading config file: %s", err)
+		log.Errorf("Error reading config file: %s", err)
 		return
 	}
 
-	var config map[string]interface{}
-	err = yaml.Unmarshal(data, &config)
+	var rawConfig map[string]interface{}
+	err = yaml.Unmarshal(data, &rawConfig)
 	if err != nil {
-		log.Printf("Error parsing config file: %s", err)
+		log.Errorf("Error parsing config file: %s", err)
 		return
 	}
 
-	log.Printf("Config: %+v", config)
+	log.Debugf("Config: %+v", rawConfig)
 
-	// Parse containers.
+	config := &Config{
+		Containers: []*Container{},
+	}
+
 	var ok bool
 	var subConfig map[interface{}]interface{}
 
-	if subConfig, ok = config["containers"].(map[interface{}]interface{}); !ok {
-		log.Println("Missing or invalid 'containers' key in config")
+	// Parse containers.
+	if subConfig, ok = rawConfig["containers"].(map[interface{}]interface{}); !ok {
+		log.Errorf("Missing or invalid 'containers' key in config")
 		return
 	}
 
-	var containers []*Container
 	for k, v := range subConfig {
 		name := k.(string)
 
 		c, err := parseContainer(name, v)
 		if err != nil {
-			log.Printf("Error parsing container %s: %s", name, err)
+			log.Errorf("Error parsing container %s: %s", name, err)
 			return
 		}
 
-		containers = append(containers, c)
+		config.Containers = append(config.Containers, c)
 	}
 
 	// Find the topological sorting of our containers.
-	toposort, err := TopoSortContainers(containers)
+	config.ContainerSort, err = TopoSortContainers(config.Containers)
 	if err != nil {
 		// TODO: good message?
-		log.Println(err)
+		log.Errorf("Error topologically sorting: %s", err)
 		return
 	}
-	_ = toposort
 
 	// Figure out what we're doing with our config.
 	cmd := strings.ToLower(flag.Arg(0))
 	switch cmd {
 	case "create":
-		CmdCreate()
+		cmdCreate(config)
 
 	default:
-		log.Printf("Unknown command: %s", cmd)
+		log.Errorf("Unknown command: %s", cmd)
 		return
 	}
 
-	log.Println("Completed successfully")
+	log.Infof("Completed successfully")
 }

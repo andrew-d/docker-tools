@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
+
+	"github.com/andrew-d/docker-tools/log"
 )
 
-var _ = log.Println
+var _ = log.Infof
 
 // TopoSortContainers uses the Kahn algorithm for topological sorting (adapted
 // from Wikipedia and RosettaCode)

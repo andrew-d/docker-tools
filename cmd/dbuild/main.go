@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/andrew-d/docker-tools/log"
 	"github.com/fsouza/go-dockerclient"
 	flag "github.com/ogier/pflag"
 )
@@ -61,38 +61,38 @@ func main() {
 
 	dockerfilePath, err := filepath.Abs(flag.Arg(0))
 	if err != nil {
-		log.Printf("Error finding absolute path (1): %s", err)
+		log.Errorf("Error finding absolute path (1): %s", err)
 		return
 	}
 
 	rootPath, err := filepath.Abs(flag.Arg(1))
 	if err != nil {
-		log.Printf("Error finding absolute path (2): %s", err)
+		log.Errorf("Error finding absolute path (2): %s", err)
 		return
 	}
 
 	outputPath := flag.Arg(2)
 
-	log.Println("Started")
+	log.Infof("Started")
 
 	client, err := docker.NewClient(flagEndpoint)
 	if err != nil {
-		log.Printf("Error creating Docker client: %s", err)
+		log.Errorf("Error creating Docker client: %s", err)
 		return
 	}
 
 	err = client.Ping()
 	if err != nil {
-		log.Printf("Error pinging Docker client: %s", err)
+		log.Errorf("Error pinging Docker client: %s", err)
 		return
 	}
 
-	log.Println("Connected to Docker client")
+	log.Infof("Connected to Docker client")
 
 	// Create the output buffer.
 	outf, err := os.Create(outputPath)
 	if err != nil {
-		log.Printf("Error creating output file: %s", err)
+		log.Errorf("Error creating output file: %s", err)
 		return
 	}
 	defer outf.Close()
@@ -100,7 +100,7 @@ func main() {
 	// Create our build context tar file.
 	buildctx, err := ioutil.TempFile("", "dbuild-ctx")
 	if err != nil {
-		log.Printf("Error creating temporary build context file: %s", err)
+		log.Errorf("Error creating temporary build context file: %s", err)
 		return
 	}
 	defer buildctx.Close()
@@ -110,18 +110,18 @@ func main() {
 	// Write the Dockerfile into the build context
 	dockerfile, err := os.Open(dockerfilePath)
 	if err != nil {
-		log.Printf("Error opening Dockerfile: %s", err)
+		log.Errorf("Error opening Dockerfile: %s", err)
 		return
 	}
 
 	err = writeFileTo(tr, dockerfile, "Dockerfile")
 	if err != nil {
-		log.Printf("Error writing Dockerfile to build context: %s", err)
+		log.Errorf("Error writing Dockerfile to build context: %s", err)
 		return
 	}
 
 	// Recursively search the root for other files and add those.
-	log.Println("Adding files to build context...")
+	log.Infof("Adding files to build context...")
 
 	rootDockerfilePath := filepath.Join(rootPath, "Dockerfile")
 	err = filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
@@ -171,25 +171,25 @@ func main() {
 
 		// TODO: ensure that the file we're adding isn't our Dockerfile?
 
-		// log.Println(path)
+		// log.Infof(path)
 
 		return err
 	})
 
 	// Clear line
 	fmt.Printf("\r\033[2K")
-	log.Println("Finished adding build context")
+	log.Infof("Finished adding build context")
 
 	err = tr.Close()
 	if err != nil {
-		log.Printf("Error finalizing build context: %s", err)
+		log.Errorf("Error finalizing build context: %s", err)
 		return
 	}
 
 	// Need to rewind our tar file handle to the beginning.
 	_, err = buildctx.Seek(0, 0)
 	if err != nil {
-		log.Printf("Error seeking to beginning of build context: %s", err)
+		log.Errorf("Error seeking to beginning of build context: %s", err)
 		return
 	}
 
@@ -197,7 +197,7 @@ func main() {
 	if len(flagImageName) == 0 {
 		flagImageName = randString(20)
 	}
-	log.Printf("Using image name: %s", flagImageName)
+	log.Infof("Using image name: %s", flagImageName)
 
 	// Set up build options.  Note that the escape at the end resets the
 	// terminal color.
@@ -214,22 +214,22 @@ func main() {
 	}
 
 	// Send everything off for building
-	log.Println("Starting to build image, please wait...")
+	log.Infof("Starting to build image, please wait...")
 	err = client.BuildImage(opts)
 	if err != nil {
-		log.Printf("Error building image: %s", err)
+		log.Errorf("Error building image: %s", err)
 		return
 	}
-	log.Println("Finished building image")
+	log.Infof("Finished building image")
 
 	// Inspect the image to get information.
 	img, err := client.InspectImage(flagImageName)
 	if err != nil {
-		log.Printf("Error inspecting image: %s", err)
+		log.Errorf("Error inspecting image: %s", err)
 		return
 	}
 
-	log.Printf("Image built (size = %d)", img.Size)
+	log.Infof("Image built (size = %d)", img.Size)
 
 	// Export the image to our output file.
 	exportOpts := docker.ExportImageOptions{
@@ -237,26 +237,26 @@ func main() {
 		OutputStream: outf,
 	}
 
-	log.Println("Exporting built image, please wait...")
+	log.Infof("Exporting built image, please wait...")
 	err = client.ExportImage(exportOpts)
 	if err != nil {
-		log.Printf("Error exporting image: %s", err)
+		log.Errorf("Error exporting image: %s", err)
 		return
 	}
-	log.Println("Finished exporting")
+	log.Infof("Finished exporting")
 
 	// Optionally remove the image.
 	if flagRmAfter {
-		log.Println("Removing image...")
+		log.Infof("Removing image...")
 		err = client.RemoveImage(flagImageName)
 		if err != nil {
-			log.Printf("Error removing image: %s", err)
+			log.Errorf("Error removing image: %s", err)
 			return
 		}
-		log.Println("Image removed")
+		log.Infof("Image removed")
 	}
 
-	log.Println("Completed successfully")
+	log.Infof("Completed successfully")
 }
 
 // Write the contents of a file to a TAR file.

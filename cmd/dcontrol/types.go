@@ -1,5 +1,11 @@
 package main
 
+type Config struct {
+	// Parsed containers and topological sort.
+	Containers []*Container
+	ContainerSort []int
+}
+
 type Container struct {
 	Name       string
 	Image      string
