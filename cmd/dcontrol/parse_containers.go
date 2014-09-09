@@ -57,6 +57,11 @@ func parseContainerMap(name string, config map[interface{}]interface{}) (*Contai
 		case "mount-from":
 			err = parseContainerMapMountFrom(ret, val)
 
+		case "privileged":
+			err = parseContainerMapPrivileged(ret, val)
+
+		// TODO: extra runtime arguments
+
 		default:
 			return nil, fmt.Errorf("Unknown key in config for container %s: %s", name, key)
 		}
@@ -272,5 +277,15 @@ func parseContainerMapMountFrom(ret *Container, val interface{}) error {
 		ret.MountFrom = append(ret.MountFrom, mount)
 	}
 
+	return nil
+}
+
+func parseContainerMapPrivileged(ret *Container, val interface{}) error {
+	var ok bool
+
+	ret.Privileged, ok = val.(bool)
+	if !ok {
+		return fmt.Errorf("Unknown value type: %T", val)
+	}
 	return nil
 }
