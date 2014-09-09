@@ -26,13 +26,13 @@ func cmdCreate(config *Config) {
 				log.Errorf("Error inspecting container %s: %s", container.Name, err)
 				return
 			}
-		}
-
-		// Sanity check: ensure the container is using our image.
-		if inspect.Image != container.Image {
-			log.Errorf("Container %s exists, but is not using the correct image (using: %s, expected: %s)",
-				container.Name, inspect.Image, container.Image)
-			return
+		} else {
+			// Sanity check: ensure the container is using our image.
+			if inspect.Image != container.Image {
+				log.Errorf("Container %s exists, but is not using the correct image (using: %s, expected: %s)",
+					container.Name, inspect.Image, container.Image)
+				return
+			}
 		}
 
 		// Set the options used when creating our container.
