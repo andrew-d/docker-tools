@@ -15,6 +15,10 @@
 			"Rev": "e4f7d00f344b0954fa3791a8527d10ba7334eceb"
 		},
 		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Rev": "410219ae829b24af99a4d48a79858f23d0be42ee"
+		},
+		{
 			"ImportPath": "gopkg.in/yaml.v1",
 			"Rev": "feb4ca79644e8e7e39c06095246ee54b1282c118"
 		}
