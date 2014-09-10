@@ -108,6 +108,9 @@ func main() {
 	case "create":
 		cmdCreate(config)
 
+	case "start":
+		cmdStart(config)
+
 	default:
 		log.Errorf("Unknown command: %s", cmd)
 		return
