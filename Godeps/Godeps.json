@@ -6,6 +6,10 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/aybabtme/rgbterm",
+			"Rev": "9e3d038e1b8341ed7416c841a884cab4a3487941"
+		},
+		{
 			"ImportPath": "github.com/fsouza/go-dockerclient",
 			"Comment": "0.2.1-242-g4c095e6",
 			"Rev": "4c095e69b1fb9fb1ca44035a7cdb7c40fe3d3b5a"
