@@ -13,5 +13,4 @@ build/dcontrol: cmd/dcontrol/*.go
 
 .PHONY: test
 test:
-	godep go test -v cmd/dbuild/*.go
-	godep go test -v cmd/dcontrol/*.go
+	cd cmd && godep go test -v ./...
