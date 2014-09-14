@@ -7,7 +7,6 @@ import (
 )
 
 func parseContainer(name string, config interface{}) (*Container, error) {
-
 	switch v := config.(type) {
 	case string:
 		// The value is an image name

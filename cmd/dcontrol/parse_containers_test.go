@@ -218,3 +218,61 @@ func TestParseContainerPrivileged(t *testing.T) {
 	err = parseContainerMapPrivileged(&q, 1234)
 	assert.EqualError(t, err, "Unknown value type: int")
 }
+
+func TestParseContainerMap(t *testing.T) {
+	t.Parallel()
+
+	var err error
+
+	input := map[interface{}]interface{}{
+		"image":        "",
+		"dependencies": []interface{}{},
+		"env":          []interface{}{},
+		"ports":        []interface{}{},
+		"mount":        []interface{}{},
+		"mount-from":   []interface{}{},
+		"privileged":   false,
+	}
+
+	_, err = parseContainerMap("test", input)
+	assert.NoError(t, err)
+
+	input = map[interface{}]interface{}{
+		1234: "asdf",
+	}
+	_, err = parseContainerMap("test", input)
+	assert.EqualError(t, err, "Unknown key in config for container test: 1234")
+
+	input = map[interface{}]interface{}{
+		"otherkey": "",
+	}
+	_, err = parseContainerMap("test", input)
+	assert.EqualError(t, err, "Unknown key in config for container test: otherkey")
+}
+
+func TestParseContainer(t *testing.T) {
+	t.Parallel()
+
+	var err error
+	var c *Container
+
+	c, err = parseContainer("foo", "theimage")
+	assert.NoError(t, err)
+	assert.Equal(t, c, &Container{
+		Name:  "foo",
+		Image: "theimage",
+	})
+
+	input := map[interface{}]interface{}{
+		"image": "img123",
+	}
+	c, err = parseContainer("foo", input)
+	assert.NoError(t, err)
+	assert.Equal(t, c, &Container{
+		Name:  "foo",
+		Image: "img123",
+	})
+
+	c, err = parseContainer("bad", 1234)
+	assert.EqualError(t, err, "Unknown type for 'containers' key: int")
+}
