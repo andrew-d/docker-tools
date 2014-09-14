@@ -33,7 +33,7 @@ func TestRandomGraphs(t *testing.T) {
 		for i := 0; i < numNodes; i++ {
 			containers[i] = &Container{
 				Name:         fmt.Sprintf("container%d", i),
-				Dependencies: []string{},
+				Dependencies: []DepConfig{},
 			}
 
 			numDeps := rng.Intn(10)
@@ -47,9 +47,13 @@ func TestRandomGraphs(t *testing.T) {
 				_, seen := seenDeps[depNum]
 
 				if !seen && i != depNum {
+					depName := fmt.Sprintf("container%d", depNum)
 					containers[i].Dependencies = append(
 						containers[i].Dependencies,
-						fmt.Sprintf("container%d", depNum),
+						DepConfig{
+							Name:  depName,
+							Alias: depName,
+						},
 					)
 					seenDeps[depNum] = struct{}{}
 					addedDeps++
@@ -72,7 +76,7 @@ func TestRandomGraphs(t *testing.T) {
 
 			// Validate dependencies
 			for i, dep := range node.Dependencies {
-				if !done[dep] {
+				if !done[dep.Name] {
 					t.Fatalf("Node %d: dependency %d (%s) not done", idx, i, dep)
 				}
 			}

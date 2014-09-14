@@ -9,3 +9,9 @@ build/dbuild: cmd/dbuild/*.go
 
 build/dcontrol: cmd/dcontrol/*.go
 	godep go build -o $@ $^
+
+
+.PHONY: test
+test:
+	godep go test -v cmd/dbuild/*.go
+	godep go test -v cmd/dcontrol/*.go
